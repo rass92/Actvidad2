@@ -21,7 +21,8 @@ int map[casillas]; //El valor de cada caja
 CLASECromosoma a, b, c, d; //varios cromosomas auxiliares
 CLASEAGenetico ag;  //poblaciÃ³n de cromosomas a ser cruzadas en el AG (ag=poblaciÃ³n)
 FILE *archivo;      //archivo de salida donde se guardan variables de monitoreo
-
+FILE *mapas;
+bool t;
 
 // DECLARAR funciones (prototipo de las funciones que se definen al final del cÃ³digo)
 float evaluacion(uchar *);  //funciÃ³n que recibe el string que forma al cromosoma, lo decodifica, y devuelve su fitness
@@ -39,8 +40,11 @@ int main()
 
     //archivo de excel
     archivo = fopen("ejemplo01_evol.xls", "w+");
+    mapas = fopen("matriz.prn", "r");
     fprintf(archivo, "Mejor:\tPoblacion:\n"); // \n\r para windows
-
+    t=importTabFile(mapas,*map,N_CASILLAS);
+    
+    
     //inicio ciclo de entrenamiento
     do{
         ag.Generacion();    //itero una generaciÃ³n: selecciÃ³n -> cruce -> mutaciÃ³n
