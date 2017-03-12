@@ -96,7 +96,7 @@ bool importTabFile (FILE *apArchivo, int *x, int casillas)
 		fscanf(apArchivo,"%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f", &fx[0], &fy[1], &fx[2], &fx[3], &fx[4], &fx[5], &fx[6], &fx[7], &fx[8], &fx[9], &fx[10], &fx[11], &fx[12], &fx[13], &fx[14], &fx[15], &fx[16], &fx[17], &fx[18], &fx[19]);	//leo una fila, dos datos de una vez
 		for (int j=0; j<casillas; j++)
 		{
-		x[i,j]=fx[j];
+		x[i][j]=fx[j];
 		}
 		
 	}
