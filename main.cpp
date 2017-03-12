@@ -8,6 +8,7 @@
 #define N_BYTES         400  // longitud mÃ¡xima del string (cromosoma). se utiliza a efectos de reserva de espacio
 #define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaciÃ³n
 #define N_PASOS        400      //cantidad de pasos maximos que hara el algoritmo
+#define N_MOV        4      //numero de pasos que se pueden realizar: arriba, abajo, izquierda y derecha
 #define N_CASILLAS        21      //longitud de un lado del mapa que es de forma de cuadrada
 
 
@@ -40,13 +41,9 @@ int main()
 
     //archivo de excel
     archivo = fopen("ejemplo01_evol.xls", "w+");
-  
-    fprintf(archivo, "Mejor:\tPoblacion:\n"); // \n\r para windows
-    
-    //Se abre el archivo donde esta el mapa
     mapas = fopen("matriz.prn", "r");
+    fprintf(archivo, "Mejor:\tPoblacion:\n"); // \n\r para windows
     t=importTabFile(mapas,*map,N_CASILLAS);
-    
     
     
     //inicio ciclo de entrenamiento
@@ -79,13 +76,15 @@ int main()
 float evaluacion(uchar* cromosoma)
 {
     float fitness = 0;      //auxiliar en el cÃ¡lculo de valor o fitness de la soluciÃ³n
-    float Penalizacion = 0; //valor de penalizacion si solucion no es valida
-    int Est_actual;
-    int Est_siguente;
-    int j=0, k=0;
-    int dis_x, dis_y,dis_xi, dis_yi;
-    float distancia = 0, distancia_i = 0;
-    float dis_total = 0;
+    float repetidos = 0; //valor de penalizacion si el paso es repetido
+    float chocados = 0; //valor de penalizacion si se choca con obstáculos
+    int pasoActual;
+    int pasoSiguente;
+    //int j=0;
+    int k=0;
+    float posicion[][]; //este se supone que es el arreglo que viene de mi matriz fija
+    int pos_x=0, pos_y=0;
+    int ubi_x=0, ubi_y=0;
 
     int pasosVacios = 327;
 
@@ -100,28 +99,38 @@ float evaluacion(uchar* cromosoma)
                 dis_x = x_pos[j] - 0;
                 dis_y = y_pos[j] - 0;
             }else{
-                Est_actual = *(cromoRep + i); //0,1,2,4,5
-                Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
+                pasoActual = *(cromosoma + i); //0,1,2,3
+                pasoSiguente = *(cromosoma + i + 1); //0,1,2,3
 
-                j = Est_actual%N_ALMACEN;
-                k = Est_siguente%N_ALMACEN;
-
-                if(i==0){
-                    dis_xi = 0 - x_pos[j];
-                    dis_yi = 0 - y_pos[j];
-                    distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
+                //j = pasoActual% N_MOV;
+                k = pasoSiguente% N_MOV;
+                
+                if(k==0){
+                    pos_y = pos_y + 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y + 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y + 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y - 1;
+                    }
+                }
+                
+                if(k==0){
+                    pos_y = pos_y + 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y + 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y + 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y - 1;
+                    }
                 }
 
-                dis_x = x_pos[j] - x_pos[k];
-                dis_y = y_pos[j] - y_pos[k];
-
-
-                if((j==1 && k==2) || (j==2 && k==1)){
-                    Penalizacion = 40;
-                }
-                if( (j==5 && k==4)){
-                    Penalizacion = Penalizacion + 40;
-                }
             }
             distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
             dis_total = dis_total + distancia + Penalizacion + distancia_i;
