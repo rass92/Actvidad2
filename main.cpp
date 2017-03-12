@@ -2,76 +2,57 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "./lib/clase_ag.cpp"   //incluyo la libreria que est� en carpeta contigua
-#include "./lib/extra_ag2.h"
+#include "./lib/clase_ag.cpp"   //incluyo la libreria que estÃ¡ en carpeta contigua
 
-#define N_BYTES         5  // longitud m�xima del string (cromosoma). se utiliza a efectos de reserva de espacio
-#define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaci�n
-#define N_DATOS      25     // Cantidad de datos dentro del documento de datos
-#define N_FUNC      5       //Cantidad de funciones ccon las que se va a comparar
+#define N_BYTES         9  // longitud mÃ¡xima del string (cromosoma). se utiliza a efectos de reserva de espacio
+#define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaciÃ³n
+#define N_ALMACEN    9      //cantidad de individuos que forman a la poblaciÃ³n
 
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 
+// variables
+float x_pos[N_ALMACEN]={-1,-3,2,-4,2,2,4,2,4}; //El valor de cada caja
+float y_pos[N_ALMACEN]={-4,-2,2,-3,5,6,6,-2,4}; //El peso de cada caja
+
 CLASECromosoma a, b, c, d; //varios cromosomas auxiliares
-CLASEAGenetico ag;  //poblaci�n de cromosomas a ser cruzadas en el AG (ag=poblaci�n)
+CLASEAGenetico ag;  //poblaciÃ³n de cromosomas a ser cruzadas en el AG (ag=poblaciÃ³n)
 FILE *archivo;      //archivo de salida donde se guardan variables de monitoreo
-FILE *mejor;        //archivo donde se guarda los valores del mejor cromosoma final
-FILE *fp;           //archivo de datos donde estara los valores reales
-bool t;
 
 
-// DECLARAR funciones (prototipo de las funciones que se definen al final del c�digo)
-float evaluacion(uchar *);  //funci�n que recibe el string que forma al cromosoma, lo decodifica, y devuelve su fitness
-void mostrar(uchar *);  //funci�n que recibe al cromosoma y lo muestra en pantalla (visualizaci�n)
-float y_cal[N_DATOS],x_dado[N_DATOS],y_dado[N_DATOS];
+// DECLARAR funciones (prototipo de las funciones que se definen al final del cÃ³digo)
+float evaluacion(uchar *);  //funciÃ³n que recibe el string que forma al cromosoma, lo decodifica, y devuelve su fitness
+void mostrar(uchar *);  //funciÃ³n que recibe al cromosoma y lo muestra en pantalla (visualizaciÃ³n)
+
 int main()
 {
     //apuntador auxiliar a un cromosoma
     CLASECromosoma *apuntador = NULL;
 
     ag.InicializarSemillaRand(true);    //incializo la semilla aleatoria
-    ag.PoblacionAleatoria(N_INDIVIDUOS, N_BYTES);   //configuraci�n de la poblaci�n inicial
-    ag.FuncionEvaluacion(evaluacion);   //indico cual es la funci�n de decodificaci�n/fitness
-    ag.dTasaMutacion = 0.1f;            //tasa de mutaci�n
+    ag.PoblacionAleatoria(N_INDIVIDUOS, N_BYTES);   //configuraciÃ³n de la poblaciÃ³n inicial
+    ag.FuncionEvaluacion(evaluacion);   //indico cual es la funciÃ³n de decodificaciÃ³n/fitness
+    ag.dTasaMutacion = 0.1f;            //tasa de mutaciÃ³n
 
     //archivo de excel
     archivo = fopen("ejemplo01_evol.xls", "w+");
     fprintf(archivo, "Mejor:\tPoblacion:\n"); // \n\r para windows
 
-    fp=fopen("data2.xls", "r");     //abriendo el archivo de los valores reales
-    t=importTabFile(fp,x_dado,y_dado,N_DATOS);
-
-     mejor=fopen("mejor.txt", "w+");
-
     //inicio ciclo de entrenamiento
     do{
-        ag.Generacion();    //itero una generaci�n: selecci�n -> cruce -> mutaci�n
+        ag.Generacion();    //itero una generaciÃ³n: selecciÃ³n -> cruce -> mutaciÃ³n
         apuntador = ag.SeleccionarMejor();  //selecciono al mejor
-        //imprimo en pantalla (y en el archivo) al fitness del mejor y al de la poblaci�n
+        //imprimo en pantalla (y en el archivo) al fitness del mejor y al de la poblaciÃ³n
         printf("\nMejor: %.3f\tPob: %.3f\t", apuntador->Fitness(), ag.Fitness());
-        fprintf (archivo, "%.3f\t%.3f\n", (apuntador->Fitness())*100, (ag.Fitness())*100);
+        fprintf (archivo, "%.3f\t%.3f\n", apuntador->Fitness(), ag.Fitness());
         //muestro el contenido del cromosoma del mejor
         mostrar(apuntador->Cromosoma);
-    }while(ag.Edad() < 5000);    // condicion de parada
-
-
+    }while(ag.Edad() < 500);    // condicion de parada
 
     //imprimo la edad de la poblacion: numero de iteraciones totales ejecutadas (generaciones)
     printf ("\n\tGeneracion: %ld", ag.Edad());
-
-    //metiendo el valores del mejor cromosoma
-
-	for (int z=0; z < N_DATOS; z++)
-	{
-		fprintf(mejor, "%f\t%f\n", x_dado[z], y_cal[z]);
-	}
-
-
     //cierro al archivo correctamente
     fclose(archivo);
-    fclose(mejor);
-    fclose(fp);
     return 0;
 }
 
@@ -79,164 +60,228 @@ int main()
 /*
  ** ----------------------------------------------------------------------------
  **     Nombre      :
- **     Funci�n     :
- **     Par�metros  :
+ **     FunciÃ³n     :
+ **     ParÃ¡metros  :
  **     Retorna     :
  ** ----------------------------------------------------------------------------
  */
-float evaluacion(unsigned char* cromosoma)
+float evaluacion(uchar* cromosoma)
 {
-    float fitness = 0;      //auxiliar en el c�lculo de valor o fitness de la soluci�n
+    float fitness = 0;      //auxiliar en el cÃ¡lculo de valor o fitness de la soluciÃ³n
     float Penalizacion = 0; //valor de penalizacion si solucion no es valida
-    float error=0;          //el error entre el valor real y el estimado
-    int curva;              // numero de funcion que se va a evaluar
-    float valor1,valor2,valor3,valor4;      //los coeficientes de la funcion a evaluar
-    int i;
+    int Est_actual;
+    int Est_siguente;
+    int j=0, k=0;
+    int dis_x, dis_y,dis_xi, dis_yi;
+    float distancia = 0, distancia_i = 0;
+    float dis_total = 0;
 
+    unsigned char ciudades [N_ALMACEN], copia[N_ALMACEN], cromoRep[N_ALMACEN];
+    char a,b;
+    int z=0;
 
-
-    // decodificando cada byte del cromosoma
-
-    curva = cromosoma[0]%N_FUNC;
-
-    valor1 = crDecodificar8(cromosoma[1],5,-5);
-    valor2 = crDecodificar8(cromosoma[2],5,-5);
-    valor3 = crDecodificar8(cromosoma[3],5,-5);
-    valor4 = crDecodificar8(cromosoma[4],5,-5);
-
-    //funcion seno
-
-    if(curva==0){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1*sin(valor2*x_dado[i]+valor3)+valor4;
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
-            }
+    for(a=0x00; a<N_ALMACEN; a=a+0x01)
+    {
+        ciudades[a]= a;
+        copia[a]=cromosoma[a]%N_ALMACEN;
+        cromoRep [a]=0;
     }
 
-    //funcion coseno
-
-    if(curva==1){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1*cos(valor2*x_dado[i]+valor3)+valor4;
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
+    for (a=0x00;a<N_ALMACEN;a=a+0x01)
+    {
+        z=0;
+        for (b=0x00; b<N_ALMACEN;b=b+0x01)
+        {
+            if (ciudades[b]==copia[a])
+            {
+                z=1;
+                ciudades[b]=15;
+                cromoRep[a]=copia[a];
             }
+        }
+        if(z==0)
+        {
+            copia[a]=15;
+        }
     }
 
-    //funcion exponencial
 
-     if(curva==2){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1*exp(valor2*x_dado[i]+valor3)+valor4;
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
+    for (a=0x00;a<N_ALMACEN;a=a+0x01)
+    {
+        if (copia[a]==15)
+        {
+            for (b=0x00;b<N_ALMACEN;b=b+0x01)
+            {
+                if (ciudades[b]!=15)
+                {
+                    cromoRep[a]=ciudades[b];
+                    ciudades[b]=15;
+                    break;
+                }
+
             }
+        }
     }
 
-        // funcion recta
+    //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
+    //char mask = 0x01;
+    for (int i=0; i < N_ALMACEN; i++)
+    {
+        if(i == (N_ALMACEN - 1)){
+            Est_actual = *(cromoRep + i);
+            j = Est_actual%N_ALMACEN;
+            dis_x = x_pos[j] - 0;
+            dis_y = y_pos[j] - 0;
+        }else{
+            Est_actual = *(cromoRep + i); //0,1,2,4,5
+            Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
 
-       if(curva==3){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1+valor2*x_dado[i];
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
+            j = Est_actual%N_ALMACEN;
+            k = Est_siguente%N_ALMACEN;
+
+            if(i==0){
+                dis_xi = 0 - x_pos[j];
+                dis_yi = 0 - y_pos[j];
+                distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
             }
-    }
 
-    //funcion polinomica
+            dis_x = x_pos[j] - x_pos[k];
+            dis_y = y_pos[j] - y_pos[k];
 
-    if(curva==4){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1+valor2*x_dado[i]+valor3*pow(x_dado[i],2)+valor4*pow(x_dado[i],3);
-                error=pow((y_cal[i]-y_dado[i]),2);
-                Penalizacion=Penalizacion+error;
+
+            if((j==1 && k==2) || (j==2 && k==1)){
+                Penalizacion = 40;
             }
+            if( (j==5 && k==4)){
+                Penalizacion = Penalizacion + 40;
+            }
+        }
+        distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
+        dis_total = dis_total + distancia + Penalizacion + distancia_i;
+        Penalizacion = 0;
+        distancia_i = 0;
     }
+    //Ahora debo de calcular el error
+    //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
 
-        //diviendo entre el valor total del error cuadratico medio
-    Penalizacion=Penalizacion/N_DATOS;
-
-    fitness = 100/(1 + Penalizacion);
-
-
+    //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
+    fitness = 1/(1 + dis_total);
     return fitness;
 }
 
 /*
  ** ----------------------------------------------------------------------------
  **     Nombre      :
- **     Funci�n     :
- **     Par�metros  :
+ **     FunciÃ³n     :
+ **     ParÃ¡metros  :
  **     Retorna     :
  ** ----------------------------------------------------------------------------
  */
 
 void mostrar(uchar* cromosoma)
 {
-
-    float fitness = 0;      //auxiliar en el c�lculo de valor o fitness de la soluci�n
+    float fitness = 0;      //auxiliar en el cÃ¡lculo de valor o fitness de la soluciÃ³n
     float Penalizacion = 0; //valor de penalizacion si solucion no es valida
-    float error=0;
-    int curva;
-    float valor1,valor2,valor3,valor4;
-    int i;
+    int Est_actual;
+    int Est_siguente;
+    int j=0, k=0;
+    int dis_x, dis_y,dis_xi, dis_yi;
+    float distancia = 0, distancia_i = 0;
+    float dis_total = 0;
 
+    unsigned char ciudades [N_ALMACEN], copia[N_ALMACEN], cromoRep[N_ALMACEN];
+    char a,b;
+    int z=0;
 
+    for(a=0x00; a<N_ALMACEN; a=a+0x01)
+    {
+        ciudades[a]= a;
+        copia[a]=cromosoma[a]%N_ALMACEN;
+        cromoRep [a]=0;
 
-
-
-
-    curva = cromosoma[0]%N_FUNC;
-    valor1 = crDecodificar8(cromosoma[1],5,-5);
-    valor2 = crDecodificar8(cromosoma[2],5,-5);
-    valor3 = crDecodificar8(cromosoma[3],5,-5);
-    valor4 = crDecodificar8(cromosoma[4],5,-5);
-
-
-
-
-
-    if(curva==0){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1*sin(valor2*x_dado[i]+valor3)+valor4;
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
-            }
     }
 
-    if(curva==1){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1*cos(valor2*x_dado[i]+valor3)+valor4;
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
+    for (a=0x00;a<N_ALMACEN;a=a+0x01)
+    {
+        z=0;
+        for (b=0x00; b<N_ALMACEN;b=b+0x01)
+        {
+            if (ciudades[b]==copia[a])
+            {
+                z=1;
+                ciudades[b]=15;
+                cromoRep[a]=copia[a];
+
             }
+        }
+        if(z==0)
+        {
+            copia[a]=15;
+        }
     }
 
-     if(curva==2){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1*exp(valor2*x_dado[i]+valor3)+valor4;
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
+
+    for (a=0x00;a<N_ALMACEN;a=a+0x01)
+    {
+        if (copia[a]==15)
+        {
+            for (b=0x00;b<N_ALMACEN;b=b+0x01)
+            {
+                if (ciudades[b]!=15)
+                {
+                    cromoRep[a]=ciudades[b];
+                    ciudades[b]=15;
+                    break;
+                }
+
             }
+        }
     }
 
-       if(curva==3){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1+valor2*x_dado[i];
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
-            }
-    }
 
-    if(curva==4){
-            for(i=0;i<N_DATOS;i++){
-                y_cal[i]=valor1+valor2*x_dado[i]+valor3*pow(x_dado[i],2)+valor4*pow(x_dado[i],3);
-                error=pow(y_cal[i]-y_dado[i],2);
-                Penalizacion=Penalizacion+error;
+    //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
+    //char mask = 0x01;
+    for (int i=0; i < N_ALMACEN; i++)
+    {
+        if(i == (N_ALMACEN - 1)){
+            Est_actual = *(cromoRep + i);
+            j = Est_actual%N_ALMACEN;
+            dis_x = x_pos[j] - 0;
+            dis_y = y_pos[j] - 0;
+        }else{
+            Est_actual = *(cromoRep + i); //0,1,2,4,5
+            Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
+
+            j = Est_actual%N_ALMACEN;
+            k = Est_siguente%N_ALMACEN;
+
+            if(i==0){
+                dis_xi = 0 - x_pos[j];
+                dis_yi = 0 - y_pos[j];
+                distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
             }
+
+            dis_x = x_pos[j] - x_pos[k];
+            dis_y = y_pos[j] - y_pos[k];
+
+
+            if((j==1 && k==2) || (j==2 && k==1)){
+                Penalizacion = 40;
+            }
+            if( (j==5 && k==4)){
+                Penalizacion = Penalizacion + 40;
+            }
+        }
+        distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
+        dis_total = dis_total + distancia + Penalizacion + distancia_i;
+        printf("%i",j+1);
+        Penalizacion = 0;
+        distancia_i = 0;
     }
-    Penalizacion=Penalizacion/N_DATOS;
-    fitness = 100/(1 + Penalizacion);
-   printf ("\nFitness= %.3f\t Error Total= %.2f\n Curva=%d\tValor1=%.2f\t Valor2=%.2f\t Valor3=%.2f\t Valor4=%.2f\n", fitness, Penalizacion,curva,valor1,valor2,valor3,valor4);
-}
+    //Ahora debo de calcular el error
+    //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
+
+    //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
+    fitness = 1/(1 + dis_total);
+    printf ("\nFitness= %.3f\tDistancia Total= %.2f\n", fitness, dis_total);
+
