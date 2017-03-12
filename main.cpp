@@ -7,8 +7,8 @@
 
 #define N_BYTES         400  // longitud mÃ¡xima del string (cromosoma). se utiliza a efectos de reserva de espacio
 #define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaciÃ³n
-#define PasosMax        400      //cantidad de pasos maximos que hara el algoritmo
-#define casillas        21      //longitud de un lado del mapa que es de forma de cuadrada
+#define N_PASOS        400      //cantidad de pasos maximos que hara el algoritmo
+#define N_CASILLAS        21      //longitud de un lado del mapa que es de forma de cuadrada
 
 
 typedef unsigned char uchar;
