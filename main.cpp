@@ -1,19 +1,23 @@
 #include <iostream>
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include "./lib/clase_ag.cpp"   //incluyo la libreria que estÃ¡ en carpeta contigua
+#include "./lib/extra_ag2.cpp"  //incluyo libreria
 
-#define N_BYTES         9  // longitud mÃ¡xima del string (cromosoma). se utiliza a efectos de reserva de espacio
+#define N_BYTES         400  // longitud mÃ¡xima del string (cromosoma). se utiliza a efectos de reserva de espacio
 #define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaciÃ³n
-#define N_ALMACEN    9      //cantidad de individuos que forman a la poblaciÃ³n
+#define PasosMax        400      //cantidad de pasos maximos que hara el algoritmo
+#define casillas        20      //longitud de un lado del mapa que es de forma de cuadrada
+
 
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 
 // variables
-float x_pos[N_ALMACEN]={-1,-3,2,-4,2,2,4,2,4}; //El valor de cada caja
-float y_pos[N_ALMACEN]={-4,-2,2,-3,5,6,6,-2,4}; //El peso de cada caja
+int map[casillas]; //El valor de cada caja
+
 
 CLASECromosoma a, b, c, d; //varios cromosomas auxiliares
 CLASEAGenetico ag;  //poblaciÃ³n de cromosomas a ser cruzadas en el AG (ag=poblaciÃ³n)
