@@ -83,18 +83,22 @@ bool leerBit (char *string, unsigned int i)
 //	X2	Y2
 //	......
 //	XN	YN
-bool importTabFile (FILE *apArchivo, float *x, float *y, int cuantos)
+bool importTabFile (FILE *apArchivo, int *x, int casillas)
 {
 	//chequeo si el apuntador al archivo provisto es nulo. salgo
 	if (apArchivo==NULL)	return false;
 	// si el numero de datos solicitados es menor o igual a cero, salgo.
-	if (cuantos <=0) return false;
+	if (casillas <=0) return false;
 
-	float fx, fy;
-	for (int i=0; i<cuantos; i++)
+	int fx[20];
+	for (int i=0; i<casillas; i++)
 	{
-		fscanf(apArchivo,"%f%f", &fx, &fy);	//leo una fila, dos datos de una vez
-		x[i]=fx;	y[i]=fy;
+		fscanf(apArchivo,"%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f", &fx[0], &fy[1], &fx[2], &fx[3], &fx[4], &fx[5], &fx[6], &fx[7], &fx[8], &fx[9], &fx[10], &fx[11], &fx[12], &fx[13], &fx[14], &fx[15], &fx[16], &fx[17], &fx[18], &fx[19]);	//leo una fila, dos datos de una vez
+		for (int j=0; j<casillas; j++)
+		{
+		x[i,j]=fx[j];
+		}
+		
 	}
 	return true;
 }
