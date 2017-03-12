@@ -40,9 +40,13 @@ int main()
 
     //archivo de excel
     archivo = fopen("ejemplo01_evol.xls", "w+");
-    mapas = fopen("matriz.prn", "r");
+  
     fprintf(archivo, "Mejor:\tPoblacion:\n"); // \n\r para windows
+    
+    //Se abre el archivo donde esta el mapa
+    mapas = fopen("matriz.prn", "r");
     t=importTabFile(mapas,*map,N_CASILLAS);
+    
     
     
     //inicio ciclo de entrenamiento
