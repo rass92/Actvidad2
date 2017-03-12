@@ -83,90 +83,49 @@ float evaluacion(uchar* cromosoma)
     float distancia = 0, distancia_i = 0;
     float dis_total = 0;
 
-    unsigned char ciudades [N_ALMACEN], copia[N_ALMACEN], cromoRep[N_ALMACEN];
-    char a,b;
-    int z=0;
-
-    for(a=0x00; a<N_ALMACEN; a=a+0x01)
-    {
-        ciudades[a]= a;
-        copia[a]=cromosoma[a]%N_ALMACEN;
-        cromoRep [a]=0;
-    }
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        z=0;
-        for (b=0x00; b<N_ALMACEN;b=b+0x01)
-        {
-            if (ciudades[b]==copia[a])
-            {
-                z=1;
-                ciudades[b]=15;
-                cromoRep[a]=copia[a];
-            }
-        }
-        if(z==0)
-        {
-            copia[a]=15;
-        }
-    }
-
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        if (copia[a]==15)
-        {
-            for (b=0x00;b<N_ALMACEN;b=b+0x01)
-            {
-                if (ciudades[b]!=15)
-                {
-                    cromoRep[a]=ciudades[b];
-                    ciudades[b]=15;
-                    break;
-                }
-
-            }
-        }
-    }
+    int pasosVacios = 327;
 
     //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
     //char mask = 0x01;
-    for (int i=0; i < N_ALMACEN; i++)
+    for (int i=0; i < N_PASOS; i++)
     {
-        if(i == (N_ALMACEN - 1)){
-            Est_actual = *(cromoRep + i);
-            j = Est_actual%N_ALMACEN;
-            dis_x = x_pos[j] - 0;
-            dis_y = y_pos[j] - 0;
+        if(pasosVacios==0){
+            if(i == (N_ALMACEN - 1)){
+                Est_actual = *(cromoRep + i);
+                j = Est_actual%N_ALMACEN;
+                dis_x = x_pos[j] - 0;
+                dis_y = y_pos[j] - 0;
+            }else{
+                Est_actual = *(cromoRep + i); //0,1,2,4,5
+                Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
+
+                j = Est_actual%N_ALMACEN;
+                k = Est_siguente%N_ALMACEN;
+
+                if(i==0){
+                    dis_xi = 0 - x_pos[j];
+                    dis_yi = 0 - y_pos[j];
+                    distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
+                }
+
+                dis_x = x_pos[j] - x_pos[k];
+                dis_y = y_pos[j] - y_pos[k];
+
+
+                if((j==1 && k==2) || (j==2 && k==1)){
+                    Penalizacion = 40;
+                }
+                if( (j==5 && k==4)){
+                    Penalizacion = Penalizacion + 40;
+                }
+            }
+            distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
+            dis_total = dis_total + distancia + Penalizacion + distancia_i;
+            Penalizacion = 0;
+            distancia_i = 0;
         }else{
-            Est_actual = *(cromoRep + i); //0,1,2,4,5
-            Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
-
-            j = Est_actual%N_ALMACEN;
-            k = Est_siguente%N_ALMACEN;
-
-            if(i==0){
-                dis_xi = 0 - x_pos[j];
-                dis_yi = 0 - y_pos[j];
-                distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
-            }
-
-            dis_x = x_pos[j] - x_pos[k];
-            dis_y = y_pos[j] - y_pos[k];
-
-
-            if((j==1 && k==2) || (j==2 && k==1)){
-                Penalizacion = 40;
-            }
-            if( (j==5 && k==4)){
-                Penalizacion = Penalizacion + 40;
-            }
+            i=N_PASOS;
         }
-        distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
-        dis_total = dis_total + distancia + Penalizacion + distancia_i;
-        Penalizacion = 0;
-        distancia_i = 0;
     }
     //Ahora debo de calcular el error
     //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
