@@ -83,24 +83,37 @@ bool leerBit (char *string, unsigned int i)
 //	X2	Y2
 //	......
 //	XN	YN
-bool importTabFile (FILE *apArchivo, int *x, int casillas)
+bool importTabFile (FILE *apArchivo, int x[22][22], int casillas)
 {
+
 	//chequeo si el apuntador al archivo provisto es nulo. salgo
 	if (apArchivo==NULL)	return false;
 	// si el numero de datos solicitados es menor o igual a cero, salgo.
 	if (casillas <=0) return false;
 
-	int fx[20];
+	int fx[casillas];
 	for (int i=0; i<casillas; i++)
 	{
-		fscanf(apArchivo,"%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f%f", &fx[0], &fy[1], &fx[2], &fx[3], &fx[4], &fx[5], &fx[6], &fx[7], &fx[8], &fx[9], &fx[10], &fx[11], &fx[12], &fx[13], &fx[14], &fx[15], &fx[16], &fx[17], &fx[18], &fx[19]);	//leo una fila, dos datos de una vez
-		for (int j=0; j<casillas; j++)
+		fscanf(apArchivo,"%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d%d",&fx[0], &fx[1], &fx[2], &fx[3], &fx[4], &fx[5], &fx[6], &fx[7], &fx[8], &fx[9], &fx[10], &fx[11], &fx[12], &fx[13], &fx[14], &fx[15], &fx[16], &fx[17], &fx[18], &fx[19], &fx[20], &fx[21]);	//leo una fila, dos datos de una vez
+
+
+            for (int j=0; j<casillas; j++)
+            {
+                x[i][j]=fx[j];
+            }
+
+
+        /*
+        for (int k=0; k<casillas; k++)
 		{
-		x[i][j]=fx[j];
+            printf("%d",x[i][k]);
 		}
-		
+		printf("\n");
+		*/
 	}
 	return true;
 }
+
+
 
 #endif
