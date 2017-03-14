@@ -3,19 +3,19 @@
 #include <math.h>
 #include <string.h>
 #include "./lib/clase_ag.cpp"   //incluyo la libreria que estÃ¡ en carpeta contigua
-#include "./lib/extra_ag2.cpp"  //incluyo libreria
+#include "./Actvidad2-master/extra_ag2.cpp"  //incluyo libreria
 
 #define N_BYTES         400  // longitud mÃ¡xima del string (cromosoma). se utiliza a efectos de reserva de espacio
-#define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaciÃ³n
+#define N_INDIVIDUOS    1 //cantidad de individuos que forman a la poblaciÃ³n
 #define N_PASOS        400      //cantidad de pasos maximos que hara el algoritmo
-#define N_CASILLAS        21      //longitud de un lado del mapa que es de forma de cuadrada
+#define N_CASILLAS        22      //longitud de un lado del mapa que es de forma de cuadrada
 
 
 typedef unsigned char uchar;
 typedef unsigned long ulong;
 
 // variables
-int map[casillas]; //El valor de cada caja
+int mapa[N_CASILLAS][N_CASILLAS]; //El valor de cada caja
 
 
 CLASECromosoma a, b, c, d; //varios cromosomas auxiliares
@@ -28,8 +28,7 @@ bool t;
 float evaluacion(uchar *);  //funciÃ³n que recibe el string que forma al cromosoma, lo decodifica, y devuelve su fitness
 void mostrar(uchar *);  //funciÃ³n que recibe al cromosoma y lo muestra en pantalla (visualizaciÃ³n)
 
-int main()
-{
+int main(){
     //apuntador auxiliar a un cromosoma
     CLASECromosoma *apuntador = NULL;
 
@@ -40,15 +39,16 @@ int main()
 
     //archivo de excel
     archivo = fopen("ejemplo01_evol.xls", "w+");
-  
+
     fprintf(archivo, "Mejor:\tPoblacion:\n"); // \n\r para windows
-    
+
     //Se abre el archivo donde esta el mapa
     mapas = fopen("matriz.prn", "r");
-    t=importTabFile(mapas,*map,N_CASILLAS);
-    
-    
-    
+
+
+    t=importTabFile(mapas,mapa,N_CASILLAS);
+
+
     //inicio ciclo de entrenamiento
     do{
         ag.Generacion();    //itero una generaciÃ³n: selecciÃ³n -> cruce -> mutaciÃ³n
@@ -58,10 +58,21 @@ int main()
         fprintf (archivo, "%.3f\t%.3f\n", apuntador->Fitness(), ag.Fitness());
         //muestro el contenido del cromosoma del mejor
         mostrar(apuntador->Cromosoma);
-    }while(ag.Edad() < 500);    // condicion de parada
+    }while(ag.Edad() < 1);    // condicion de parada
 
     //imprimo la edad de la poblacion: numero de iteraciones totales ejecutadas (generaciones)
-    printf ("\n\tGeneracion: %ld", ag.Edad());
+    printf ("\n\tGeneracion: %ld \n", ag.Edad());
+
+
+    for (int i=0; i<N_CASILLAS; i++)
+        {
+
+    for (int j=0; j<N_CASILLAS; j++)
+		{
+            printf("%d ",mapa[i][j]);
+		}
+		printf("\n");
+        }
     //cierro al archivo correctamente
     fclose(archivo);
     return 0;
@@ -87,93 +98,6 @@ float evaluacion(uchar* cromosoma)
     float distancia = 0, distancia_i = 0;
     float dis_total = 0;
 
-    unsigned char ciudades [N_ALMACEN], copia[N_ALMACEN], cromoRep[N_ALMACEN];
-    char a,b;
-    int z=0;
-
-    for(a=0x00; a<N_ALMACEN; a=a+0x01)
-    {
-        ciudades[a]= a;
-        copia[a]=cromosoma[a]%N_ALMACEN;
-        cromoRep [a]=0;
-    }
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        z=0;
-        for (b=0x00; b<N_ALMACEN;b=b+0x01)
-        {
-            if (ciudades[b]==copia[a])
-            {
-                z=1;
-                ciudades[b]=15;
-                cromoRep[a]=copia[a];
-            }
-        }
-        if(z==0)
-        {
-            copia[a]=15;
-        }
-    }
-
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        if (copia[a]==15)
-        {
-            for (b=0x00;b<N_ALMACEN;b=b+0x01)
-            {
-                if (ciudades[b]!=15)
-                {
-                    cromoRep[a]=ciudades[b];
-                    ciudades[b]=15;
-                    break;
-                }
-
-            }
-        }
-    }
-
-    //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
-    //char mask = 0x01;
-    for (int i=0; i < N_ALMACEN; i++)
-    {
-        if(i == (N_ALMACEN - 1)){
-            Est_actual = *(cromoRep + i);
-            j = Est_actual%N_ALMACEN;
-            dis_x = x_pos[j] - 0;
-            dis_y = y_pos[j] - 0;
-        }else{
-            Est_actual = *(cromoRep + i); //0,1,2,4,5
-            Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
-
-            j = Est_actual%N_ALMACEN;
-            k = Est_siguente%N_ALMACEN;
-
-            if(i==0){
-                dis_xi = 0 - x_pos[j];
-                dis_yi = 0 - y_pos[j];
-                distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
-            }
-
-            dis_x = x_pos[j] - x_pos[k];
-            dis_y = y_pos[j] - y_pos[k];
-
-
-            if((j==1 && k==2) || (j==2 && k==1)){
-                Penalizacion = 40;
-            }
-            if( (j==5 && k==4)){
-                Penalizacion = Penalizacion + 40;
-            }
-        }
-        distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
-        dis_total = dis_total + distancia + Penalizacion + distancia_i;
-        Penalizacion = 0;
-        distancia_i = 0;
-    }
-    //Ahora debo de calcular el error
-    //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
 
     //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
     fitness = 1/(1 + dis_total);
@@ -200,99 +124,10 @@ void mostrar(uchar* cromosoma)
     float distancia = 0, distancia_i = 0;
     float dis_total = 0;
 
-    unsigned char ciudades [N_ALMACEN], copia[N_ALMACEN], cromoRep[N_ALMACEN];
-    char a,b;
-    int z=0;
 
-    for(a=0x00; a<N_ALMACEN; a=a+0x01)
-    {
-        ciudades[a]= a;
-        copia[a]=cromosoma[a]%N_ALMACEN;
-        cromoRep [a]=0;
-
-    }
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        z=0;
-        for (b=0x00; b<N_ALMACEN;b=b+0x01)
-        {
-            if (ciudades[b]==copia[a])
-            {
-                z=1;
-                ciudades[b]=15;
-                cromoRep[a]=copia[a];
-
-            }
-        }
-        if(z==0)
-        {
-            copia[a]=15;
-        }
-    }
-
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        if (copia[a]==15)
-        {
-            for (b=0x00;b<N_ALMACEN;b=b+0x01)
-            {
-                if (ciudades[b]!=15)
-                {
-                    cromoRep[a]=ciudades[b];
-                    ciudades[b]=15;
-                    break;
-                }
-
-            }
-        }
-    }
-
-
-    //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
-    //char mask = 0x01;
-    for (int i=0; i < N_ALMACEN; i++)
-    {
-        if(i == (N_ALMACEN - 1)){
-            Est_actual = *(cromoRep + i);
-            j = Est_actual%N_ALMACEN;
-            dis_x = x_pos[j] - 0;
-            dis_y = y_pos[j] - 0;
-        }else{
-            Est_actual = *(cromoRep + i); //0,1,2,4,5
-            Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
-
-            j = Est_actual%N_ALMACEN;
-            k = Est_siguente%N_ALMACEN;
-
-            if(i==0){
-                dis_xi = 0 - x_pos[j];
-                dis_yi = 0 - y_pos[j];
-                distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
-            }
-
-            dis_x = x_pos[j] - x_pos[k];
-            dis_y = y_pos[j] - y_pos[k];
-
-
-            if((j==1 && k==2) || (j==2 && k==1)){
-                Penalizacion = 40;
-            }
-            if( (j==5 && k==4)){
-                Penalizacion = Penalizacion + 40;
-            }
-        }
-        distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
-        dis_total = dis_total + distancia + Penalizacion + distancia_i;
-        printf("%i",j+1);
-        Penalizacion = 0;
-        distancia_i = 0;
-    }
-    //Ahora debo de calcular el error
-    //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
-
-    //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
     fitness = 1/(1 + dis_total);
     printf ("\nFitness= %.3f\tDistancia Total= %.2f\n", fitness, dis_total);
 
+
+
+}
