@@ -9,7 +9,7 @@
 #define N_INDIVIDUOS    100 //cantidad de individuos que forman a la poblaciÃ³n
 #define N_PASOS        400      //cantidad de pasos maximos que hara el algoritmo
 #define N_MOV        4      //numero de pasos que se pueden realizar: arriba, abajo, izquierda y derecha
-#define N_CASILLAS        21      //longitud de un lado del mapa que es de forma de cuadrada
+#define N_CASILLAS        22      //longitud de un lado del mapa que es de forma de cuadrada
 
 
 typedef unsigned char uchar;
