@@ -90,14 +90,72 @@ int main(){
 float evaluacion(uchar* cromosoma)
 {
     float fitness = 0;      //auxiliar en el cÃ¡lculo de valor o fitness de la soluciÃ³n
-    float Penalizacion = 0; //valor de penalizacion si solucion no es valida
-    int Est_actual;
-    int Est_siguente;
-    int j=0, k=0;
-    int dis_x, dis_y,dis_xi, dis_yi;
-    float distancia = 0, distancia_i = 0;
-    float dis_total = 0;
+    float repetidos = 0; //valor de penalizacion si el paso es repetido
+    float chocados = 0; //valor de penalizacion si se choca con obstáculos
+    int pasoActual;
+    int pasoSiguente;
+    //int j=0;
+    int k=0;
+    float posicion[][]; //este se supone que es el arreglo que viene de mi matriz fija
+    int pos_x=0, pos_y=0;
+    int ubi_x=0, ubi_y=0;
 
+    int pasosVacios = 327;
+
+    //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
+    //char mask = 0x01;
+    for (int i=0; i < N_PASOS; i++)
+    {
+        if(pasosVacios==0){
+            if(i == (N_ALMACEN - 1)){
+                Est_actual = *(cromoRep + i);
+                j = Est_actual%N_ALMACEN;
+                dis_x = x_pos[j] - 0;
+                dis_y = y_pos[j] - 0;
+            }else{
+                pasoActual = *(cromosoma + i); //0,1,2,3
+                pasoSiguente = *(cromosoma + i + 1); //0,1,2,3
+
+                //j = pasoActual% N_MOV;
+                k = pasoSiguente% N_MOV;
+                
+                if(k==0){
+                    pos_y = pos_y + 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y + 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y + 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y - 1;
+                    }
+                }
+                
+                if(k==0){
+                    pos_y = pos_y + 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y + 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y + 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y - 1;
+                    }
+                }
+
+            }
+            distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
+            dis_total = dis_total + distancia + Penalizacion + distancia_i;
+            Penalizacion = 0;
+            distancia_i = 0;
+        }else{
+            i=N_PASOS;
+        }
+    }
+    //Ahora debo de calcular el error
+    //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
 
     //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
     fitness = 1/(1 + dis_total);
