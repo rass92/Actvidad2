@@ -93,12 +93,6 @@ float evaluacion(uchar* cromosoma)
     for (int i=0; i < N_PASOS; i++)
     {
         if(pasosVacios==0){
-            if(i == (N_ALMACEN - 1)){
-                Est_actual = *(cromoRep + i);
-                j = Est_actual%N_ALMACEN;
-                dis_x = x_pos[j] - 0;
-                dis_y = y_pos[j] - 0;
-            }else{
                 pasoActual = *(cromosoma + i); //0,1,2,3
                 pasoSiguente = *(cromosoma + i + 1); //0,1,2,3
 
@@ -118,24 +112,48 @@ float evaluacion(uchar* cromosoma)
                     }
                 }
                 
-                if(k==0){
-                    pos_y = pos_y + 1;
+                if(k==1){
+                    pos_x = pos_x + 1;
                     if(posicion[pos_x][pos_y]==0){
-                        ubi_y = ubi_y + 1; 
+                        ubi_x = ubi_x + 1; 
                     }else if(posicion[pos_x][pos_y]==1){
-                        ubi_y = ubi_y + 1;
+                        ubi_x = ubi_x + 1;
                         repetidos = repetidos + 1;
                     }else{
                          chocados =  chocados + 1;
-                         pos_y = pos_y - 1;
+                         pos_x = pos_x - 1;
                     }
                 }
-
-            }
-            distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
-            dis_total = dis_total + distancia + Penalizacion + distancia_i;
-            Penalizacion = 0;
-            distancia_i = 0;
+            
+                if(k==2){
+                    pos_y = pos_y - 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y - 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y - 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y + 1;
+                    }
+                }
+            
+                if(k==3){
+                    pos_x = pos_x - 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_x = ubi_x - 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_x = ubi_x - 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_x = pos_x + 1;
+                    }
+                }
+            //distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
+            //dis_total = dis_total + distancia + Penalizacion + distancia_i;
+            //Penalizacion = 0;
+            //distancia_i = 0;
         }else{
             i=N_PASOS;
         }
