@@ -162,7 +162,7 @@ float evaluacion(uchar* cromosoma)
     //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
 
     //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
-    fitness = 1/(1 + dis_total);
+    fitness = 1/(1 + repetidos + chocados);
     return fitness;
 }
 
