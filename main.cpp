@@ -178,107 +178,92 @@ float evaluacion(uchar* cromosoma)
 void mostrar(uchar* cromosoma)
 {
     float fitness = 0;      //auxiliar en el cÃ¡lculo de valor o fitness de la soluciÃ³n
-    float Penalizacion = 0; //valor de penalizacion si solucion no es valida
-    int Est_actual;
-    int Est_siguente;
-    int j=0, k=0;
-    int dis_x, dis_y,dis_xi, dis_yi;
-    float distancia = 0, distancia_i = 0;
-    float dis_total = 0;
+    float repetidos = 0; //valor de penalizacion si el paso es repetido
+    float chocados = 0; //valor de penalizacion si se choca con obstáculos
+    int pasoActual;
+    int pasoSiguente;
+    //int j=0;
+    int k=0;
+    float posicion[][]; //este se supone que es el arreglo que viene de mi matriz fija
+    int pos_x=0, pos_y=0;
+    int ubi_x=0, ubi_y=0;
 
-    unsigned char ciudades [N_ALMACEN], copia[N_ALMACEN], cromoRep[N_ALMACEN];
-    char a,b;
-    int z=0;
-
-    for(a=0x00; a<N_ALMACEN; a=a+0x01)
-    {
-        ciudades[a]= a;
-        copia[a]=cromosoma[a]%N_ALMACEN;
-        cromoRep [a]=0;
-
-    }
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        z=0;
-        for (b=0x00; b<N_ALMACEN;b=b+0x01)
-        {
-            if (ciudades[b]==copia[a])
-            {
-                z=1;
-                ciudades[b]=15;
-                cromoRep[a]=copia[a];
-
-            }
-        }
-        if(z==0)
-        {
-            copia[a]=15;
-        }
-    }
-
-
-    for (a=0x00;a<N_ALMACEN;a=a+0x01)
-    {
-        if (copia[a]==15)
-        {
-            for (b=0x00;b<N_ALMACEN;b=b+0x01)
-            {
-                if (ciudades[b]!=15)
-                {
-                    cromoRep[a]=ciudades[b];
-                    ciudades[b]=15;
-                    break;
-                }
-
-            }
-        }
-    }
-
+    int pasosVacios = 327;
 
     //procedo a decodificar el cromosoma, para ver cuales cajas van dentro del contenedor
     //char mask = 0x01;
-    for (int i=0; i < N_ALMACEN; i++)
+    for (int i=0; i < N_PASOS; i++)
     {
-        if(i == (N_ALMACEN - 1)){
-            Est_actual = *(cromoRep + i);
-            j = Est_actual%N_ALMACEN;
-            dis_x = x_pos[j] - 0;
-            dis_y = y_pos[j] - 0;
+        if(pasosVacios==0){
+                pasoActual = *(cromosoma + i); //0,1,2,3
+                pasoSiguente = *(cromosoma + i + 1); //0,1,2,3
+
+                //j = pasoActual% N_MOV;
+                k = pasoSiguente% N_MOV;
+                
+                if(k==0){
+                    pos_y = pos_y + 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y + 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y + 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y - 1;
+                    }
+                }
+                
+                if(k==1){
+                    pos_x = pos_x + 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_x = ubi_x + 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_x = ubi_x + 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_x = pos_x - 1;
+                    }
+                }
+            
+                if(k==2){
+                    pos_y = pos_y - 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_y = ubi_y - 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_y = ubi_y - 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_y = pos_y + 1;
+                    }
+                }
+            
+                if(k==3){
+                    pos_x = pos_x - 1;
+                    if(posicion[pos_x][pos_y]==0){
+                        ubi_x = ubi_x - 1; 
+                    }else if(posicion[pos_x][pos_y]==1){
+                        ubi_x = ubi_x - 1;
+                        repetidos = repetidos + 1;
+                    }else{
+                         chocados =  chocados + 1;
+                         pos_x = pos_x + 1;
+                    }
+                }
+            //distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
+            //dis_total = dis_total + distancia + Penalizacion + distancia_i;
+            //Penalizacion = 0;
+            //distancia_i = 0;
         }else{
-            Est_actual = *(cromoRep + i); //0,1,2,4,5
-            Est_siguente = *(cromoRep + i + 1); //1,2,3,4,6
-
-            j = Est_actual%N_ALMACEN;
-            k = Est_siguente%N_ALMACEN;
-
-            if(i==0){
-                dis_xi = 0 - x_pos[j];
-                dis_yi = 0 - y_pos[j];
-                distancia_i = sqrt((pow(dis_xi,2))+(pow(dis_yi,2)));
-            }
-
-            dis_x = x_pos[j] - x_pos[k];
-            dis_y = y_pos[j] - y_pos[k];
-
-
-            if((j==1 && k==2) || (j==2 && k==1)){
-                Penalizacion = 40;
-            }
-            if( (j==5 && k==4)){
-                Penalizacion = Penalizacion + 40;
-            }
+            i=N_PASOS;
         }
-        distancia = sqrt((pow(dis_x,2))+(pow(dis_y,2)));
-        dis_total = dis_total + distancia + Penalizacion + distancia_i;
-        printf("%i",j+1);
-        Penalizacion = 0;
-        distancia_i = 0;
     }
     //Ahora debo de calcular el error
     //Para ello chequeo si excedo del mÃ¡ximo permitido. Si estoy dentro del rango, penalizo
 
     //ahora calculo el fitness, o valor neto, en funciÃ³n del ValorTotal, la Penalizacion y el VolumenRest
-    fitness = 1/(1 + dis_total);
-    printf ("\nFitness= %.3f\tDistancia Total= %.2f\n", fitness, dis_total);
+    fitness = 1/(1 + repetidos + chocados);
+    printf ("\nFitness= %.3f\tDistancia Total= %.2f\n", fitness);
 
